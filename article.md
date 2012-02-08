@@ -1,5 +1,5 @@
 # How to make an HTTP Request
-Another extremely common programming task is making an HTTP request to a web server.  Node.js provides a simple API for this functionality in the form of `http.request`.
+A common programming task is making an HTTP request to a web server.  Node.js provides a simple API for this functionality in the form of `http.request`.
 
 As an example, you are going to preform a GET request to [http://www.random.org/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new](http://www.random.org/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new) (which returns a random integer between 1 and 10) and print the result to the console.
 
@@ -17,7 +17,7 @@ As an example, you are going to preform a GET request to [http://www.random.org/
 
       response.setEncoding('ascii');
 
-      //another chunk of data has been received, so append it to `str`
+      //another chunk of data has been received, so append it to `retStr`
       response.on('data', function (chunk) {
         retStr += chunk;
       });
@@ -35,17 +35,21 @@ As an example, you are going to preform a GET request to [http://www.random.org/
 
     request.end();
 
+Let's analyze this piece of code:
+
 ## The request options
 First we prepare the options object literal with the host name and request path. If our target service used a different port from port 80 we could specify it by passing in the `port` option. Also, if we need to, we can send the server some headers by using the `headers` option. We'll cover some of that later.
 
-Then we prepare a callback function for when the the HTTP server responds. For now you don't really need to understand what it does except that it handles the server response. We will look into the response handler in depth later.
+Then we prepare a callback function (named `responseCallback`) for when the the HTTP server responds. For now you don't really need to understand what it does except that it handles the server response. We will look into the response handler in depth later.
 
 ## The Client Request object
-Then we create the request object by invoking the `request` function in the "http" module. This function returns an instance of `http.ClientRequest` that we store in the local variable named "request". Besides doing the actual HTTP request for us - sending the headers - , this client request object can also write the HTTP request body should we need to: this object is also a writable stream that we can write or pipe into. But for now we won't need to use it, so we just end that stream by calling `request.end()`, which terminates our request. Now we are ready for the server to reply.
+Then we create the request object by invoking the `request` function in the "http" module. This function returns an instance of `http.ClientRequest` that we store in the local variable named "request". Besides doing the actual HTTP request for us - sending the request headers to the server - , this object can also send the HTTP request body to the server if we need to: the client request object is also a writable stream that we can write or pipe into. But for now we won't need to use it: we just end that stream by calling `request.end()`, which terminates our request. Now we are ready for the server to reply.
 
 ## Processing the server reply
 
-When Node gets the server reply it triggers the event "response" on the client request object. Fortunately for us, we had a registered callback on that event -  the `responseCallback` function. That callback function is then called and we get a new object passed into our function: the response object, which is an instance of `http.ClientResponse`. This object contains the response headers and HTTP status code. As soon we we get the response headers from the server, but the response body is not present yet. The client response object is itself a readable stream, which means that it emits "data" events as the response body is getting received. We know, in this case, that the response will be ASCII-encoded, so we set the encoding to that, which means that the data event will emit ASCII-encoded strings. Since there may be many such events, we have to collect all of them and concatenate them into this final string.
+Our request will hit the server, be processed and then replied. When Node receives the server reply it triggers the "response" event on the client request object. Fortunately for us, we had a registered callback on that event -  the `responseCallback` function, which is then called with a new object passed in: the response object, which is an instance of `http.ClientResponse`. This object contains the response headers and HTTP status code. Now we have the response headers from the server, but the response body is not yet available to us. The client response object is itself a readable stream, which means that it emits "data" events as chunks of the response body gets received.
+
+We know, in this case, that the response will be ASCII-encoded, so we set the encoding to that, which means that the data event will emit ASCII-encoded strings instead of raw buffers. Since there may be many "data" events, we have to collect all of them by concatenating them into this final string we store on a variable named "retStr".
 
 Finally, the server response ends, and so the Client Response object emits the "end" event, which we listen to, and take that chance to parse the response number and present it:
 
@@ -54,14 +58,13 @@ Finally, the server response ends, and so the Client Response object emits the "
 
 ## Making a POST Request
 
-Making a POST request is just as easy. We will make a POST request to `www.nodejitsu.com:1337` which is running a server that will echo back what we post. The code for making a POST request is almost identical to making a GET request, just a few simple modifications:
+Making a POST request is just as easy. We will make a POST request to `echo.nodejitsu.com` which is running a server that will echo back what we post. The code for making a POST request is almost identical to making a GET request, just a few simple modifications in the options object literal:
 
     var http = require('http');
 
     var options = {
       host: 'echo.nodejitsu.com',
       path: '/',
-      //since we are listening on a custom port, we need to specify it by hand
       //This is what changes the request to a POST request
       method: 'POST'
     };
@@ -76,22 +79,22 @@ Making a POST request is just as easy. We will make a POST request to `www.nodej
       });
 
       response.on('end', function () {
-        console.log('echo.nodejitsu.com replied:', str);
+        console.log(options.host + ' replied:', str);
       });
     }
 
-    var req = http.request(options, responseCallback);
+    var request = http.request(options, responseCallback);
 
     //This is the data we are posting, it needs to be a string or a buffer
-    req.write("hello world!");
+    request.write("hello world!");
 
-    req.end();
+    request.end();
 
 Here we are specifying the HTTP method, since ` http.request` assumes we are making a `GET` request by default, and we want `POST` in this case.
 
 Then we are writing the string "hello world!" "into the client request object, which encodes that string into the HTTP request body.
 
-After we end the request our response handler callback function gets invoked. Now we have to wait for the response body. First we set the respond encoding to UTF-8, which was the encoding we used - Node default encoding for strings written into streams is UTF-8 - and then concatenate all the response body pieces. When the request ends we present them.
+After we end the request our response handler callback function gets invoked. Now we have to wait for the response body. First we set the respond encoding to UTF-8, which was the encoding we used - Node default encoding for strings written into streams is UTF-8 - and then concatenate all the response body pieces as they arrive. When the request ends we present them.
 
 ## Sending Custom Headers
 
@@ -106,20 +109,20 @@ Throwing in custom headers is just a matter of populating the headers option wit
       headers: {'custom': 'Custom Header Demo works'}
     };
 
-    callback = function(response) {
-      var str = '';
+    function responseCallback(response) {
+      var reply = '';
       response.on('data', function (chunk) {
-        str += chunk;
+        reply += chunk;
       });
 
       response.on('end', function () {
-        console.log(str);
+        console.log('Server replied:', reply);
       });
     }
 
-    var req = http.request(options, callback);
-    req.end();
+    var request = http.request(options, responseCallback);
+    request.end();
 
 You should see printed out:
 
-    Custom Header Demo works
+    Server replied: Custom Header Demo works
