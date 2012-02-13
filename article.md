@@ -38,11 +38,13 @@ As an example, you are going to preform a GET request to [http://www.random.org/
 Let's analyze this piece of code:
 
 ## The request options
+
 First we prepare the options object literal with the host name and request path. If our target service used a different port from port 80 we could specify it by passing in the `port` option. Also, if we need to, we can send the server some headers by using the `headers` option. We'll cover some of that later.
 
 Then we prepare a callback function (named `responseCallback`) for when the the HTTP server responds. For now you don't really need to understand what it does except that it handles the server response. We will look into the response handler in depth later.
 
 ## The Client Request object
+
 Then we create the request object by invoking the `request` function in the "http" module. This function returns an instance of `http.ClientRequest` that we store in the local variable named "request". Besides doing the actual HTTP request for us - sending the request headers to the server - , this object can also send the HTTP request body to the server if we need to: the client request object is also a writable stream that we can write or pipe into. But for now we won't need to use it: we just end that stream by calling `request.end()`, which terminates our request. Now we are ready for the server to reply.
 
 ## Processing the server reply
