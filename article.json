@@ -4,14 +4,13 @@
 	"date": "Mon, 13 Feb 2012 14:54:38 GMT",
 	"tags": ["http", "client", "request"],
 	"authors": [
-	  { "name": "Josh Holbrook",
-		  "email": "josh.holbrook@gmail.com",
-		  "url": "https://github.com/jesusabdullah"
+	  { "name": "Nico Reed",
+		  "url": "https://github.com/nicoreed"
     },
     { "name": "Pedro Teixeira",
 		  "email": "pedro.teixeira@gmail.com",
-		  "url": "https://github.com/pgte"
+		  "url": "https://github.com/nicoreed"
     }
 	],
-	"difficulty": 1
+	"difficulty": 2
 }
