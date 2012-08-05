@@ -1,4 +1,5 @@
 # How to make an HTTP Request
+
 A common programming task is making an HTTP request to a web server.  Node.js provides a simple API for this functionality in the form of `http.request`.
 
 As an example, you are going to preform a GET request to [http://www.random.org/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new](http://www.random.org/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new) (which returns a random integer between 1 and 10) and print the result to the console.
