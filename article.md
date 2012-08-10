@@ -4,37 +4,39 @@ A common programming task is making an HTTP request to a web server.  Node.js pr
 
 As an example, you are going to preform a GET request to [http://www.random.org/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new](http://www.random.org/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new) (which returns a random integer between 1 and 10) and print the result to the console.
 
-    var http = require('http');
+```javascript
+var http = require('http');
 
-    var options = {
-      host: 'www.random.org',
-      path: '/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new'
-    };
+var options = {
+  host: 'www.random.org',
+  path: '/integers/?num=1&min=1&max=10&col=1&base=10&format=plain&rnd=new'
+};
 
-    function responseCallback(response) {
-      var retStr = '';
-      
-      console.log('Got the response from the server. Status:', response.statusCode);
+function responseCallback(response) {
+  var retStr = '';
+  
+  console.log('Got the response from the server. Status:', response.statusCode);
 
-      response.setEncoding('ascii');
+  response.setEncoding('ascii');
 
-      //another chunk of data has been received, so append it to `retStr`
-      response.on('data', function (chunk) {
-        retStr += chunk;
-      });
+  //another chunk of data has been received, so append it to `retStr`
+  response.on('data', function (chunk) {
+    retStr += chunk;
+  });
 
-      //the whole response has been received, so we just print it out here
-      response.on('end', function () {
-        var retNumber = parseInt(retStr, 10);
-        console.log('Got a random number:', retNumber);
-      });
-    }
+  //the whole response has been received, so we just print it out here
+  response.on('end', function () {
+    var retNumber = parseInt(retStr, 10);
+    console.log('Got a random number:', retNumber);
+  });
+}
 
-    var request = http.request(options);
+var request = http.request(options);
 
-    request.on('response', responseCallback);
+request.on('response', responseCallback);
 
-    request.end();
+request.end();
+```
 
 Let's analyze this piece of code:
 
@@ -63,35 +65,37 @@ Finally, the server response ends, and so the Client Response object emits the "
 
 Making a POST request is just as easy. We will make a POST request to `echo.nodejitsu.com` which is running a server that will echo back what we post. The code for making a POST request is almost identical to making a GET request, just a few simple modifications in the options object literal:
 
-    var http = require('http');
+```javascript
+var http = require('http');
 
-    var options = {
-      host: 'echo.nodejitsu.com',
-      path: '/',
-      //This is what changes the request to a POST request
-      method: 'POST'
-    };
+var options = {
+  host: 'echo.nodejitsu.com',
+  path: '/',
+  //This is what changes the request to a POST request
+  method: 'POST'
+};
 
-    function responseCallback(response) {
-      var str = ''
+function responseCallback(response) {
+  var str = ''
 
-      response.setEncoding('utf8');
+  response.setEncoding('utf8');
 
-      response.on('data', function (chunk) {
-        str += chunk;
-      });
+  response.on('data', function (chunk) {
+    str += chunk;
+  });
 
-      response.on('end', function () {
-        console.log(options.host + ' replied:', str);
-      });
-    }
+  response.on('end', function () {
+    console.log(options.host + ' replied:', str);
+  });
+}
 
-    var request = http.request(options, responseCallback);
+var request = http.request(options, responseCallback);
 
-    //This is the data we are posting, it needs to be a string or a buffer
-    request.write("hello world!");
+//This is the data we are posting, it needs to be a string or a buffer
+request.write("hello world!");
 
-    request.end();
+request.end();
+```
 
 Here we are specifying the HTTP method, since ` http.request` assumes we are making a `GET` request by default, and we want `POST` in this case.
 
@@ -103,28 +107,30 @@ After we end the request our response handler callback function gets invoked. No
 
 Throwing in custom headers is just a matter of populating the headers option with a object literal with key-value pairs. On `echoheader.nodejitsu.com` we are running a server that will print out the `custom` header.  So we will just make a quick request to it:
 
-    var http = require('http');
+```javascript
+var http = require('http');
 
-    var options = {
-      host: 'echoheader.nodejitsu.com',
-      path: '/',
-      //This is the only line that is new. `headers` is an object with the headers to request
-      headers: {'custom': 'Custom Header Demo works'}
-    };
+var options = {
+  host: 'echoheader.nodejitsu.com',
+  path: '/',
+  //This is the only line that is new. `headers` is an object with the headers to request
+  headers: {'custom': 'Custom Header Demo works'}
+};
 
-    function responseCallback(response) {
-      var reply = '';
-      response.on('data', function (chunk) {
-        reply += chunk;
-      });
+function responseCallback(response) {
+  var reply = '';
+  response.on('data', function (chunk) {
+    reply += chunk;
+  });
 
-      response.on('end', function () {
-        console.log('Server replied:', reply);
-      });
-    }
+  response.on('end', function () {
+    console.log('Server replied:', reply);
+  });
+}
 
-    var request = http.request(options, responseCallback);
-    request.end();
+var request = http.request(options, responseCallback);
+request.end();
+```
 
 You should see printed out:
 
