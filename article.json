@@ -6,11 +6,6 @@
 	"authors": [
 	  { "name": "Nico Reed",
 		  "url": "https://github.com/nicoreed"
-    },
-    { "name": "Pedro Teixeira",
-		  "email": "pedro.teixeira@gmail.com",
-		  "url": "https://github.com/pgte",
-		  "twitter": "http://twitter.com/pgte"
     }
 	],
 	"difficulty": 4,
